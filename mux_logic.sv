@@ -25,7 +25,7 @@ module mux_logic
         input data1,
         input data2,
         input sel,
-        output bit data_mux
+        output reg data_mux
     );
 
     always_comb begin

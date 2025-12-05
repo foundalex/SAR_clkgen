@@ -1,35 +1,52 @@
 `timescale 1ns / 1ps
 
-module clk_gen
+import parameters_pkg::*;
+
+module sar_clk_gen
+    #(
+		parameter GHz_enable = 1
+	)
     (
         input clk_external,
+        input reset,
         input ready,
         input register_clk,
         output clk_sample,
-        output clk_sar
+        output clk_sar,
+        //
+        input clk_1GHz
     );
 
     localparam num_delay_ready = 4;
     localparam num_delay_clk_external = 2;
-    localparam delay_unit = 1;
+    localparam delay_unit = 0.416;
 
     wire clk_delay_xor;
-    wire clk_sample;
-    bit ready;
     wire q_out;
     wire [num_delay_ready:0] ready_delay;
-    wire [num_delay_clk_external:0]clk_external_delay;
     wire clk_sample_mux1;
+    wire [num_delay_clk_external:0] clk_external_delay;
 
     assign clk_external_delay[0] = clk_external;
+
     genvar i;
     generate;
-        for (i=0; i<num_delay_clk_external; ++i) begin
-            time_delay  #(.delay (delay_unit))
-	        time_delay_inst (
-                .data_in		(clk_external_delay[i]),
-                .data_out		(clk_external_delay[i+1])
-            );
+    	if (GHz_enable == 0) begin
+        	for (i=0; i<num_delay_clk_external; ++i) begin
+            	time_delay  #(.delay (delay_unit))
+	        	time_delay_inst (
+                	.data_in		(clk_external_delay[i]),
+                	.data_out		(clk_external_delay[i+1])
+            	);
+            end
+        end else begin
+            for (i=0; i<num_delay_clk_external+1; ++i) begin
+            	sync_d_flip_flop sync_d_flip_flop_inst (
+                	.data_in		(clk_external_delay[i]),
+                    .clk            (clk_1GHz),
+                	.data_out		(clk_external_delay[i+1])
+            	);
+            end
         end
     endgenerate
 
@@ -44,7 +61,6 @@ module clk_gen
         .data2		(clk_external),
         .data_and	(clk_sample)
     );
-
 
     d_flip_flop d_flip_flop_inst (
         .clk    (clk_sample),

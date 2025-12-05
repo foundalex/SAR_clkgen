@@ -6,9 +6,19 @@ module time_delay
 	)
     (
         input data_in,
-        output data_out
+        output reg data_out
     );
 
-    assign #delay data_out = data_in;
+    // reg qwerty;
+    always_comb data_out <= #delay data_in;
+
+// initial 
+// 	begin
+//         forever begin
+// 		    qwerty = data_in;
+// 		    # delay;
+//             data_out = qwerty;
+//         end
+// 	end
 
 endmodule

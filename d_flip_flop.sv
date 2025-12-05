@@ -6,7 +6,7 @@ module d_flip_flop
         input d,
         input set,
         input reset,
-        output bit q
+        output reg q
     );
 
     always_ff @ (posedge clk or negedge set or negedge reset)
